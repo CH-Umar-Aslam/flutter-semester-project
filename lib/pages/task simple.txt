@@ -1,0 +1,181 @@
+
+
+
+import 'package:flutter/material.dart';
+import 'package:task_app/pages/displayTasks.dart';
+
+import 'package:task_app/schema/tasks.dart';
+
+class Todo extends StatefulWidget {
+  const Todo({super.key});
+
+  @override
+  State<Todo> createState() => _TodoState();
+}
+
+class _TodoState extends State<Todo> {
+  final TextEditingController taskController = TextEditingController();
+  final TextEditingController descripotionController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  List<Tasks> tasksList = [];
+  String task = "";
+  String description = "";
+  String taskPriority = "Normal";
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black45,
+        flexibleSpace: Center(
+          child: Text(
+            "Welcome to Task Management App",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              taskName(),
+              TextFormField(
+                controller: descripotionController,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Enter task description',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Required"; 
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  setState(() {
+                    description = value; 
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  Text("Choose Priority"),
+                  SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white, 
+                      borderRadius:
+                          BorderRadius.circular(12), 
+                      border: Border.all(
+                          color: Colors.grey), 
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: taskPriority,
+        items: [
+          DropdownMenuItem(
+              child: Text("Normal"), value: "Normal"),
+          DropdownMenuItem(child: Text("High"), value: "High"),
+          DropdownMenuItem(child: Text("Low"), value: "Low"),
+        ],
+       onChanged: (value) {
+        setState(() {
+          taskPriority = value.toString() ; // Update the state variable
+        });
+      },
+      ),
+    ),
+                  )
+                ],
+              ),
+
+              SizedBox(height: 20),
+
+              submitButton(),
+
+              SizedBox(height: 20),
+
+              Container(
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DisplayTasks(tasksList)));
+                      },
+                      child: Text("View tasks"))),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  ElevatedButton submitButton() {
+    return ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  // If the form is valid, print the task
+                  // print("task: $task");
+                  // You can also clear the text field if desired
+                  taskController.clear();
+                  setState(() {
+                    var newtask = Tasks(
+                      task: task,
+                      description: description,
+                      taskPriority:taskPriority,
+                      
+                    );
+
+                  
+
+                    tasksList.add(newtask);
+                    description = "";
+                    task = ""; // Clear the displayed task text
+                    taskPriority="Normal";
+                  });
+                }
+              },
+              child: Text("Submit"),
+            );
+  }
+
+
+
+
+  TextFormField taskName() {
+    return TextFormField(
+      controller: taskController,
+      decoration: InputDecoration(
+        border: UnderlineInputBorder(),
+        labelText: 'Enter task',
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Required"; // Return error message if validation fails
+        }
+        return null; // Return null if the input is valid
+      },
+      onChanged: (value) {
+        setState(() {
+          task = value; // Update the state variable
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    taskController.dispose(); // Dispose of the controller
+    descripotionController.dispose();
+    super.dispose();
+  }
+}
+
+
